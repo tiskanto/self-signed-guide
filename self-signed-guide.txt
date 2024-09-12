@@ -1,0 +1,301 @@
+###################################################################################
+--------    The Official Way of Creating a Self-signed Certificate     ------------
+###################################################################################
+
+A. The "Hard-way" 
+==================
+
+
+# generate key 
+----------------
+openssl genpkey -algorithm ED25519 -out test1.key
+openssl pkey -in test1.key -text
+
+<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl pkey -in test1.key -text
+-----BEGIN PRIVATE KEY-----
+MC4CAQAwBQYDK2VwBCIEIHkkuHkgjdgpziOyQSKo6isDgWa6CQ62dzkHeuOhCCQe
+-----END PRIVATE KEY-----
+ED25519 Private-Key:
+priv:
+    79:24:b8:79:20:8d:d8:29:ce:23:b2:41:22:a8:ea:
+    2b:03:81:66:ba:09:0e:b6:77:39:07:7a:e3:a1:08:
+    24:1e
+pub:
+    cb:13:38:4f:1a:7b:7d:ec:a2:99:36:6d:dc:a5:94:
+    85:57:91:bf:46:6a:04:37:b7:ea:8b:b7:27:f1:0e:
+    18:01
+	
+# encrypt pkey
+----------------
+
+openssl pkey -in test1.key -passout pass:test123 -aes256 -out test1-aes256.key
+
+<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl pkey -in test1-aes256.key -text
+Enter pass phrase for test1-aes256.key:
+-----BEGIN PRIVATE KEY-----
+MC4CAQAwBQYDK2VwBCIEIHkkuHkgjdgpziOyQSKo6isDgWa6CQ62dzkHeuOhCCQe
+-----END PRIVATE KEY-----
+ED25519 Private-Key:
+priv:
+    79:24:b8:79:20:8d:d8:29:ce:23:b2:41:22:a8:ea:
+    2b:03:81:66:ba:09:0e:b6:77:39:07:7a:e3:a1:08:
+    24:1e
+pub:
+    cb:13:38:4f:1a:7b:7d:ec:a2:99:36:6d:dc:a5:94:
+    85:57:91:bf:46:6a:04:37:b7:ea:8b:b7:27:f1:0e:
+    18:01
+<tiskanto@Teguhs-iMac-2:~/LAB/crt>$
+
+<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ cat test1-aes256.key
+-----BEGIN ENCRYPTED PRIVATE KEY-----
+MIGbMFcGCSqGSIb3DQEFDTBKMCkGCSqGSIb3DQEFDDAcBAj83Dg5TcKmUgICCAAw
+DAYIKoZIhvcNAgkFADAdBglghkgBZQMEASoEEGUgjcgYoofATwKPcsRVw5UEQGrR
+xokNs7iZIKmzSb13pHFK6uFAjwaHujA9mhHUqx7lQ4gwbu1N0U6TlEMLFAuOm0/j
+zm9kMR2BPyNUP8ElNOw=
+-----END ENCRYPTED PRIVATE KEY-----
+
+
+# create CSR from pkey 
+------------------------
+openssl req -new -key test1-aes256.key -out test1.csr -subj "/CN=new-teguh.org"
+openssl req -in test1.csr -text -noout -subject -verify
+
+<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl req -in test1.csr -text -noout -subject -verify
+Certificate request self-signature verify OK
+Certificate Request:
+    Data:
+        Version: 1 (0x0)
+        Subject: CN = new-teguh.org
+        Subject Public Key Info:
+            Public Key Algorithm: ED25519
+                ED25519 Public-Key:
+                pub:
+                    cb:13:38:4f:1a:7b:7d:ec:a2:99:36:6d:dc:a5:94:
+                    85:57:91:bf:46:6a:04:37:b7:ea:8b:b7:27:f1:0e:
+                    18:01
+
+
+
+# sign CSR with pkey - perform self-signed
+-------------------------------------------
+openssl x509 -req -in test1.csr -signkey test1-aes256.key -days 3650 -out test1.crt
+
+<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl x509 -req -in test1.csr -signkey test1-aes256.key -days 3650 -out test1.crt
+Enter pass phrase for test1-aes256.key:
+Certificate request self-signature ok
+subject=CN = new-teguh.org
+
+openssl x509 -in test1.crt -noout -text -verify -subject -startdate -enddate | head -20
+
+<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl x509 -in test1.crt -noout -text -verify -subject -startdate -enddate | head -20
+Certificate:
+    Data:
+        Version: 1 (0x0)
+        Serial Number:
+            07:9e:1f:a8:06:6d:8a:68:df:83:5c:9d:06:c3:ad:9f:f4:c0:c9:7f
+        Signature Algorithm: ED25519
+        Issuer: CN = new-teguh.org
+        Validity
+            Not Before: Sep 12 06:08:57 2024 GMT
+            Not After : Sep 10 06:08:57 2034 GMT
+        Subject: CN = new-teguh.org
+        Subject Public Key Info:
+            Public Key Algorithm: ED25519
+                ED25519 Public-Key:
+                pub:
+                    cb:13:38:4f:1a:7b:7d:ec:a2:99:36:6d:dc:a5:94:
+                    85:57:91:bf:46:6a:04:37:b7:ea:8b:b7:27:f1:0e:
+                    18:01
+    Signature Algorithm: ED25519
+    Signature Value:
+
+# generate 2nd key for node 
+----------------------------
+
+openssl genpkey -algorithm ED448 -out test2.key
+openssl pkey -in test2.key -text
+
+<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl pkey -in test2.key -text
+-----BEGIN PRIVATE KEY-----
+MEcCAQAwBQYDK2VxBDsEOVFJQc9xge4vQZMTdWcpTcl/Eh2Stn5Ry6NmVxeNKPot
+sMsrfPjsADbwTwsDNddBAhvIKODuNvpLPA==
+-----END PRIVATE KEY-----
+ED448 Private-Key:
+priv:
+    51:49:41:cf:71:81:ee:2f:41:93:13:75:67:29:4d:
+    c9:7f:12:1d:92:b6:7e:51:cb:a3:66:57:17:8d:28:
+    fa:2d:b0:cb:2b:7c:f8:ec:00:36:f0:4f:0b:03:35:
+    d7:41:02:1b:c8:28:e0:ee:36:fa:4b:3c
+pub:
+    85:86:a8:74:18:99:5b:04:e5:ce:c0:4c:c3:67:5b:
+    76:7f:90:af:b2:82:48:94:8d:13:aa:aa:76:27:fd:
+    b9:99:42:38:a0:f2:46:bc:8b:99:75:1d:cc:8f:f1:
+    fe:9b:ac:22:07:70:4a:70:85:65:21:00
+<tiskanto@Teguhs-iMac-2:~/LAB/crt>$
+
+# encrypt 2nd key
+----------------
+openssl pkey -in test2.key -passout pass:test321 -aes256 -out test2-aes256.key
+
+<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ cat test2-aes256.key
+-----BEGIN ENCRYPTED PRIVATE KEY-----
+MIGrMFcGCSqGSIb3DQEFDTBKMCkGCSqGSIb3DQEFDDAcBAhLeP2JuMydIQICCAAw
+DAYIKoZIhvcNAgkFADAdBglghkgBZQMEASoEEGO6yHjIw+ELdoE7kvtiWNkEUJSy
+MWRBulxATIlKzkFSMPCOq+NcHq5QSKXQvLig026IXZBLL5PNYDv0IgfAOyCfi96O
+snSuWAuAX9V2JQXcSHiefpRDqwQbYFSM/o17s+fm
+-----END ENCRYPTED PRIVATE KEY-----
+<tiskanto@Teguhs-iMac-2:~/LAB/crt>$
+
+
+# create CSR from 2nd key 
+------------------------
+
+openssl req -new -key test2-aes256.key -out test2.csr -subj "/CN=new-iskanto.net"
+
+<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl req -new -key test2-aes256.key -out test2.csr -subj "/CN=new-iskanto.net"
+Enter pass phrase for test2-aes256.key:
+
+openssl req -in test2.csr -text -verify -subject  | head -10
+<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl req -in test2.csr -text -verify -subject  | head -10
+Certificate request self-signature verify OK
+Certificate Request:
+    Data:
+        Version: 1 (0x0)
+        Subject: CN = new-iskanto.net
+        Subject Public Key Info:
+            Public Key Algorithm: ED448
+                ED448 Public-Key:
+                pub:
+                    85:86:a8:74:18:99:5b:04:e5:ce:c0:4c:c3:67:5b:
+                    76:7f:90:af:b2:82:48:94:8d:13:aa:aa:76:27:fd:
+<tiskanto@Teguhs-iMac-2:~/LAB/crt>$
+
+
+# sign CSR #2 with pkey from cert 1 & key 1 (as a CA)
+-----------------------------------------------------
+
+openssl x509 -req -in test2.csr -CA test1.crt -CAkey test1-aes256.key -days 3650 -out test2.crt
+
+<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl x509 -req -in test2.csr -CA test1.crt -CAkey test1-aes256.key -days 3650 -out test2.crt
+Certificate request self-signature ok
+subject=CN = new-iskanto.net
+Enter pass phrase for test1-aes256.key:
+
+openssl x509 -in test2.crt -subject -startdate -enddate -verify -text -noout
+<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl x509 -in test2.crt -subject -startdate -enddate -verify -text -noout | head -20
+subject=CN = new-iskanto.net
+notBefore=Sep 12 06:20:59 2024 GMT
+notAfter=Sep 10 06:20:59 2034 GMT
+Certificate:
+    Data:
+        Version: 1 (0x0)
+        Serial Number:
+            7e:2e:2e:39:ca:fd:28:ed:c6:96:db:fc:27:27:d9:c6:12:18:73:c1
+        Signature Algorithm: ED25519
+        Issuer: CN = new-teguh.org
+        Validity
+            Not Before: Sep 12 06:20:59 2024 GMT
+            Not After : Sep 10 06:20:59 2034 GMT
+        Subject: CN = new-iskanto.net
+        Subject Public Key Info:
+            Public Key Algorithm: ED448
+                ED448 Public-Key:
+                pub:
+                    85:86:a8:74:18:99:5b:04:e5:ce:c0:4c:c3:67:5b:
+                    76:7f:90:af:b2:82:48:94:8d:13:aa:aa:76:27:fd:
+<tiskanto@Teguhs-iMac-2:~/LAB/crt>$
+
+
+B. The "Easy-way" 
+==================
+
+
+# Faster version of self-signed certificate generation
+---------------------------------------------------------
+openssl req -x509 -new -newkey rsa:4096 -passout pass:test123 -keyout test3.key -days 3650 -subj "/CN=lambretta.net" -out test3.crt
+openssl x509 -in test3.crt -text -noout -subject -startdate -enddate -verify  | head -20
+
+<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl x509 -in test3.crt -text -noout -subject -startdate -enddate -verify  | head -20
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number:
+            31:9d:67:9b:41:53:f1:13:47:98:22:77:1e:b4:bf:97:c7:54:f2:7d
+        Signature Algorithm: sha256WithRSAEncryption
+        Issuer: CN = lambretta.net
+        Validity
+            Not Before: Sep 12 06:25:26 2024 GMT
+            Not After : Sep 10 06:25:26 2034 GMT
+        Subject: CN = lambretta.net
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (4096 bit)
+				
+
+
+# Faster version of self-signed CSR
+---------------------------------------------------------
+openssl req -new -newkey rsa:2048 -keyout test4.key -passout pass:test456 -out test4.csr -subj "/CN=barbetta.org"
+openssl pkey -in test4.key -text
+openssl req -in test4.csr -text -noout -verify | head -20
+
+<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl req -in test4.csr -text -noout -verify | head -20
+Certificate request self-signature verify OK
+Certificate Request:
+    Data:
+        Version: 1 (0x0)
+        Subject: CN = barbetta.org
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+                Modulus:
+
+
+
+C. Some tips & tricks  
+======================
+
+# Extract Public-key from a key 
+-----------------------------------
+openssl pkey -in test4.key -text -pubout
+
+<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl pkey -in test4.key -text -pubout | head -20
+Enter pass phrase for test4.key:
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2cfvN65SwSlZNoOksY36
+6EB7BZtqZVNfcoGT0OZMjhX8CUVVp92KAeRYiPLIFu7FMq67J5BlggMGLx1u2G8i
+NJD6rgeLz3yeXznT8q9r+W0GmpUHJnRYGuzyM7oC80uNUtFmjRmhVrWiKRueycXn
+UOG6y9ojmBDLCwjXUAWb5jG7aK1igQgfc8bIhD3jVcP7Qb7tIE3FseeBfRgzMpdF
+RVepRPogGb6pxxJ4gbho6DN0JBy49CHvH6fU1ylkNj0iRvhmKyW96qNJXDAPlnwX
+o2uuJhiGZMpMfS9QH4d7QOpHGUX5G4jrrBXXtOBlcxu8F7OajBp4wntrz5v3pNWk
+hQIDAQAB
+-----END PUBLIC KEY-----
+Public-Key: (2048 bit)
+Modulus:
+    00:d9:c7:ef:37:ae:52:c1:29:59:36:83:a4:b1:8d:
+    fa:e8:40:7b:05:9b:6a:65:53:5f:72:81:93:d0:e6:
+    4c:8e:15:fc:09:45:55:a7:dd:8a:01:e4:58:88:f2:
+    c8:16:ee:c5:32:ae:bb:27:90:65:82:03:06:2f:1d:
+    6e:d8:6f:22:34:90:fa:ae:07:8b:cf:7c:9e:5f:39:
+    d3:f2:af:6b:f9:6d:06:9a:95:07:26:74:58:1a:ec:
+    f2:33:ba:02:f3:4b:8d:52:d1:66:8d:19:a1:56:b5:
+    a2:29:1b:9e:c9:c5:e7:50:e1:ba:cb:da:23:98:10:
+    cb:0b:08:d7:50:05:9b:e6:31:bb:68:ad:62:81:08:
+<tiskanto@Teguhs-iMac-2:~/LAB/crt>$
+
+
+# Remove Passphrase from a key 
+-----------------------------------
+openssl pkey -in test4.key  > test4_priv_clear.key
+openssl pkey -in test4_priv_clear.key -pubout
+
+<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl pkey -in test4_priv_clear.key -pubout
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2cfvN65SwSlZNoOksY36
+6EB7BZtqZVNfcoGT0OZMjhX8CUVVp92KAeRYiPLIFu7FMq67J5BlggMGLx1u2G8i
+NJD6rgeLz3yeXznT8q9r+W0GmpUHJnRYGuzyM7oC80uNUtFmjRmhVrWiKRueycXn
+UOG6y9ojmBDLCwjXUAWb5jG7aK1igQgfc8bIhD3jVcP7Qb7tIE3FseeBfRgzMpdF
+RVepRPogGb6pxxJ4gbho6DN0JBy49CHvH6fU1ylkNj0iRvhmKyW96qNJXDAPlnwX
+o2uuJhiGZMpMfS9QH4d7QOpHGUX5G4jrrBXXtOBlcxu8F7OajBp4wntrz5v3pNWk
+hQIDAQAB
+-----END PUBLIC KEY-----
