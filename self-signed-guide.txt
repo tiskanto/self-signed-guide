@@ -11,7 +11,7 @@ A. The "Hard-way"
 openssl genpkey -algorithm ED25519 -out test1.key
 openssl pkey -in test1.key -text
 
-<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl pkey -in test1.key -text
+>$ openssl pkey -in test1.key -text
 -----BEGIN PRIVATE KEY-----
 MC4CAQAwBQYDK2VwBCIEIHkkuHkgjdgpziOyQSKo6isDgWa6CQ62dzkHeuOhCCQe
 -----END PRIVATE KEY-----
@@ -30,7 +30,7 @@ pub:
 
 openssl pkey -in test1.key -passout pass:test123 -aes256 -out test1-aes256.key
 
-<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl pkey -in test1-aes256.key -text
+>$ openssl pkey -in test1-aes256.key -text
 Enter pass phrase for test1-aes256.key:
 -----BEGIN PRIVATE KEY-----
 MC4CAQAwBQYDK2VwBCIEIHkkuHkgjdgpziOyQSKo6isDgWa6CQ62dzkHeuOhCCQe
@@ -44,9 +44,9 @@ pub:
     cb:13:38:4f:1a:7b:7d:ec:a2:99:36:6d:dc:a5:94:
     85:57:91:bf:46:6a:04:37:b7:ea:8b:b7:27:f1:0e:
     18:01
-<tiskanto@Teguhs-iMac-2:~/LAB/crt>$
+>$
 
-<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ cat test1-aes256.key
+>$ cat test1-aes256.key
 -----BEGIN ENCRYPTED PRIVATE KEY-----
 MIGbMFcGCSqGSIb3DQEFDTBKMCkGCSqGSIb3DQEFDDAcBAj83Dg5TcKmUgICCAAw
 DAYIKoZIhvcNAgkFADAdBglghkgBZQMEASoEEGUgjcgYoofATwKPcsRVw5UEQGrR
@@ -60,7 +60,7 @@ zm9kMR2BPyNUP8ElNOw=
 openssl req -new -key test1-aes256.key -out test1.csr -subj "/CN=new-teguh.org"
 openssl req -in test1.csr -text -noout -subject -verify
 
-<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl req -in test1.csr -text -noout -subject -verify
+>$ openssl req -in test1.csr -text -noout -subject -verify
 Certificate request self-signature verify OK
 Certificate Request:
     Data:
@@ -80,14 +80,14 @@ Certificate Request:
 -------------------------------------------
 openssl x509 -req -in test1.csr -signkey test1-aes256.key -days 3650 -out test1.crt
 
-<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl x509 -req -in test1.csr -signkey test1-aes256.key -days 3650 -out test1.crt
+>$ openssl x509 -req -in test1.csr -signkey test1-aes256.key -days 3650 -out test1.crt
 Enter pass phrase for test1-aes256.key:
 Certificate request self-signature ok
 subject=CN = new-teguh.org
 
 openssl x509 -in test1.crt -noout -text -verify -subject -startdate -enddate | head -20
 
-<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl x509 -in test1.crt -noout -text -verify -subject -startdate -enddate | head -20
+>$ openssl x509 -in test1.crt -noout -text -verify -subject -startdate -enddate | head -20
 Certificate:
     Data:
         Version: 1 (0x0)
@@ -115,7 +115,7 @@ Certificate:
 openssl genpkey -algorithm ED448 -out test2.key
 openssl pkey -in test2.key -text
 
-<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl pkey -in test2.key -text
+>$ openssl pkey -in test2.key -text
 -----BEGIN PRIVATE KEY-----
 MEcCAQAwBQYDK2VxBDsEOVFJQc9xge4vQZMTdWcpTcl/Eh2Stn5Ry6NmVxeNKPot
 sMsrfPjsADbwTwsDNddBAhvIKODuNvpLPA==
@@ -131,20 +131,20 @@ pub:
     76:7f:90:af:b2:82:48:94:8d:13:aa:aa:76:27:fd:
     b9:99:42:38:a0:f2:46:bc:8b:99:75:1d:cc:8f:f1:
     fe:9b:ac:22:07:70:4a:70:85:65:21:00
-<tiskanto@Teguhs-iMac-2:~/LAB/crt>$
+>$
 
 # encrypt 2nd key
 ----------------
 openssl pkey -in test2.key -passout pass:test321 -aes256 -out test2-aes256.key
 
-<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ cat test2-aes256.key
+>$ cat test2-aes256.key
 -----BEGIN ENCRYPTED PRIVATE KEY-----
 MIGrMFcGCSqGSIb3DQEFDTBKMCkGCSqGSIb3DQEFDDAcBAhLeP2JuMydIQICCAAw
 DAYIKoZIhvcNAgkFADAdBglghkgBZQMEASoEEGO6yHjIw+ELdoE7kvtiWNkEUJSy
 MWRBulxATIlKzkFSMPCOq+NcHq5QSKXQvLig026IXZBLL5PNYDv0IgfAOyCfi96O
 snSuWAuAX9V2JQXcSHiefpRDqwQbYFSM/o17s+fm
 -----END ENCRYPTED PRIVATE KEY-----
-<tiskanto@Teguhs-iMac-2:~/LAB/crt>$
+>$
 
 
 # create CSR from 2nd key 
@@ -152,11 +152,11 @@ snSuWAuAX9V2JQXcSHiefpRDqwQbYFSM/o17s+fm
 
 openssl req -new -key test2-aes256.key -out test2.csr -subj "/CN=new-iskanto.net"
 
-<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl req -new -key test2-aes256.key -out test2.csr -subj "/CN=new-iskanto.net"
+>$ openssl req -new -key test2-aes256.key -out test2.csr -subj "/CN=new-iskanto.net"
 Enter pass phrase for test2-aes256.key:
 
 openssl req -in test2.csr -text -verify -subject  | head -10
-<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl req -in test2.csr -text -verify -subject  | head -10
+>$ openssl req -in test2.csr -text -verify -subject  | head -10
 Certificate request self-signature verify OK
 Certificate Request:
     Data:
@@ -168,7 +168,7 @@ Certificate Request:
                 pub:
                     85:86:a8:74:18:99:5b:04:e5:ce:c0:4c:c3:67:5b:
                     76:7f:90:af:b2:82:48:94:8d:13:aa:aa:76:27:fd:
-<tiskanto@Teguhs-iMac-2:~/LAB/crt>$
+>$
 
 
 # sign CSR #2 with pkey from cert 1 & key 1 (as a CA)
@@ -176,13 +176,13 @@ Certificate Request:
 
 openssl x509 -req -in test2.csr -CA test1.crt -CAkey test1-aes256.key -days 3650 -out test2.crt
 
-<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl x509 -req -in test2.csr -CA test1.crt -CAkey test1-aes256.key -days 3650 -out test2.crt
+>$ openssl x509 -req -in test2.csr -CA test1.crt -CAkey test1-aes256.key -days 3650 -out test2.crt
 Certificate request self-signature ok
 subject=CN = new-iskanto.net
 Enter pass phrase for test1-aes256.key:
 
 openssl x509 -in test2.crt -subject -startdate -enddate -verify -text -noout
-<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl x509 -in test2.crt -subject -startdate -enddate -verify -text -noout | head -20
+>$ openssl x509 -in test2.crt -subject -startdate -enddate -verify -text -noout | head -20
 subject=CN = new-iskanto.net
 notBefore=Sep 12 06:20:59 2024 GMT
 notAfter=Sep 10 06:20:59 2034 GMT
@@ -203,7 +203,7 @@ Certificate:
                 pub:
                     85:86:a8:74:18:99:5b:04:e5:ce:c0:4c:c3:67:5b:
                     76:7f:90:af:b2:82:48:94:8d:13:aa:aa:76:27:fd:
-<tiskanto@Teguhs-iMac-2:~/LAB/crt>$
+>$
 
 
 B. The "Easy-way" 
@@ -215,7 +215,7 @@ B. The "Easy-way"
 openssl req -x509 -new -newkey rsa:4096 -passout pass:test123 -keyout test3.key -days 3650 -subj "/CN=lambretta.net" -out test3.crt
 openssl x509 -in test3.crt -text -noout -subject -startdate -enddate -verify  | head -20
 
-<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl x509 -in test3.crt -text -noout -subject -startdate -enddate -verify  | head -20
+>$ openssl x509 -in test3.crt -text -noout -subject -startdate -enddate -verify  | head -20
 Certificate:
     Data:
         Version: 3 (0x2)
@@ -239,7 +239,7 @@ openssl req -new -newkey rsa:2048 -keyout test4.key -passout pass:test456 -out t
 openssl pkey -in test4.key -text
 openssl req -in test4.csr -text -noout -verify | head -20
 
-<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl req -in test4.csr -text -noout -verify | head -20
+>$ openssl req -in test4.csr -text -noout -verify | head -20
 Certificate request self-signature verify OK
 Certificate Request:
     Data:
@@ -259,7 +259,7 @@ C. Some tips & tricks
 -----------------------------------
 openssl pkey -in test4.key -text -pubout
 
-<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl pkey -in test4.key -text -pubout | head -20
+>$ openssl pkey -in test4.key -text -pubout | head -20
 Enter pass phrase for test4.key:
 -----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2cfvN65SwSlZNoOksY36
@@ -281,7 +281,7 @@ Modulus:
     f2:33:ba:02:f3:4b:8d:52:d1:66:8d:19:a1:56:b5:
     a2:29:1b:9e:c9:c5:e7:50:e1:ba:cb:da:23:98:10:
     cb:0b:08:d7:50:05:9b:e6:31:bb:68:ad:62:81:08:
-<tiskanto@Teguhs-iMac-2:~/LAB/crt>$
+>$
 
 
 # Remove Passphrase from a key 
@@ -289,7 +289,7 @@ Modulus:
 openssl pkey -in test4.key  > test4_priv_clear.key
 openssl pkey -in test4_priv_clear.key -pubout
 
-<tiskanto@Teguhs-iMac-2:~/LAB/crt>$ openssl pkey -in test4_priv_clear.key -pubout
+>$ openssl pkey -in test4_priv_clear.key -pubout
 -----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2cfvN65SwSlZNoOksY36
 6EB7BZtqZVNfcoGT0OZMjhX8CUVVp92KAeRYiPLIFu7FMq67J5BlggMGLx1u2G8i
